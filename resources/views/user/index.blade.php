@@ -6,6 +6,8 @@
             <h3 class="card-title">{{ $page->title }}</h3>
             <div class="card-tools">
                 <a class="btn btn-sm btn-primary mt-1" href="{{ url('user/create') }}">Tambah</a>
+                <button onclick="modalAction('{{ url('user/create_ajax') }}')" class="btn btn-sm btn-success mt-1">Tambah
+                    Ajax</button>
             </div>
         </div>
         <div class="card-body">
@@ -43,6 +45,9 @@
                 </thead>
             </table>
         </div>
+        <div id="myModal" class="modal fade animate shake" tabindex="-1" role="dialog" data-backdrop="static"
+            data-keyboard="false" data-width="75%" aria-hidden="true">
+        </div>
     @endsection
 
     @push('css')
@@ -50,6 +55,18 @@
 
     @push('js')
         <script>
+            function modalAction(url = '') {
+                console.log("Memuat modal dari:", url); // Tambahkan log untuk debugging
+                $('#myModal').load(url, function(response, status, xhr) {
+                    if (status === "error") {
+                        console.log("Gagal memuat modal:", xhr.status, xhr.statusText);
+                    } else {
+                        $('#myModal').modal('show');
+                    }
+                });
+            }
+
+
             $(document).ready(function() {
                 var dataUser = $('#table_user').DataTable({
                     ajax: {
