@@ -10,16 +10,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Middleware\AuthorizeUser;
-use App\Models\LevelModel;
 
-Route::pattern('id', '[0-9]+'); // Ensures the {id} parameter must be numeric
+Route::pattern('id', '[0-9]+');
 
 Route::get('login', [AuthController::class, 'login'])->name('login');
 Route::post('login', [AuthController::class, 'postlogin']);
 Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
 
+Route::get('register', [AuthController::class, 'register'])->name('register');
+Route::post('register', [AuthController::class, 'postregister']);
+
 Route::middleware(['auth'])->group(function () {
-    // Define all routes that require authentication here
     Route::get('/', [WelcomeController::class, 'index']);
 
     Route::group(['prefix' => 'user'], function () {
@@ -76,8 +77,14 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/', [BarangController::class, 'store']);
         Route::get('/{id}', [BarangController::class, 'show']);
         Route::get('/{id}/edit', [BarangController::class, 'edit']);
-        Route::put('/{id}', [BarangController::class, 'update']);
+        Route::put('/{id}/update', [BarangController::class, 'update']);
+        Route::get('/{id}/delete_ajax', [BarangController::class, 'confirm_ajax']);
+        Route::delete('/{id}/delete_ajax', [BarangController::class, 'delete_ajax']);
         Route::delete('/{id}', [BarangController::class, 'destroy']);
+        Route::get('/import', [BarangController::class, 'import']);
+        Route::post('/import_ajax', [BarangController::class, 'import_ajax']);
+        Route::get('/export_excel', [BarangController::class, 'export_excel']);
+        Route::get('/export_pdf', [BarangController::class, 'export_pdf']);
     });
 
     Route::group(['prefix' => 'stok'], function () {

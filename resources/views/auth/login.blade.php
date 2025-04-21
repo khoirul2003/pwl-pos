@@ -58,6 +58,9 @@
                             <div class="col-4">
                                 <button type="submit" class="btn btn-primary btn-block">Sign In</button>
                             </div>
+                            <div class="col-12 mt-2 text-center">
+                                <a href="{{ url('register') }}" class="text-center">Belum punya akun? Daftar di sini</a>
+                            </div>
                             <!-- /.col -->
                         </div>
                     </form>
@@ -79,7 +82,7 @@
 
         <!-- AdminLTE App -->
         <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
-        
+
         <script>
             $.ajaxSetup({
                 headers: {
