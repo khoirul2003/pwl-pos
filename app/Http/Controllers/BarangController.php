@@ -326,5 +326,7 @@ class BarangController extends Controller
         }
 
         return redirect('/barang');
+
+        // testing
     }
 }
