@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Yajra\DataTables\Contracts\DataTable;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -264,7 +265,7 @@ class UserController extends Controller
         // Redirect jika bukan request AJAX
         return redirect('/user');
     }
-    
+
     public function confirm_ajax(string $id)
     {
         $user = UserModel::find($id);
@@ -292,5 +293,40 @@ class UserController extends Controller
         }
 
         return redirect('/');
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string|min:3|unique:m_user,username,' . Auth::id() . ',user_id',
+            'nama' => 'required|string|max:100',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+        ]);
+
+        $user = Auth::user();
+
+        // Simpan foto ke public/images jika diupload
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            $filename = time() . '.' . $file->getClientOriginalExtension();
+
+            // Simpan langsung ke folder public/images
+            $file->move(public_path('images'), $filename);
+
+            // Hapus foto lama jika ada
+            if ($user->photo && file_exists(public_path('images/' . $user->photo))) {
+                unlink(public_path('images/' . $user->photo));
+            }
+
+            $user->photo = $filename;
+        }
+
+        // Update data user
+        $user->username = $request->username;
+        $user->nama = $request->nama;
+
+        $user->save();
+
+        return redirect()->back()->with('success', 'Profil berhasil diperbarui');
     }
 }

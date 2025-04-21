@@ -33,6 +33,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}', [UserController::class, 'show']); // Menampilkan detail user
         Route::get('/{id}/edit', [UserController::class, 'edit']); // Menampilkan halaman form edit user
         Route::put('/{id}', [UserController::class, 'update']); // Menyimpan perubahan data user
+        Route::put('/update_profile', [UserController::class, 'updateProfile']);
         Route::get('/{id}/edit_ajax', [UserController::class, 'edit_ajax']);
         Route::put('/{id}/update_ajax', [UserController::class, 'update_ajax']);
         Route::get('/{id}/delete_ajax', [UserController::class, 'confirm_ajax']);
