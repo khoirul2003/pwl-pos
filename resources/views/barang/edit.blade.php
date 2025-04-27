@@ -17,7 +17,7 @@
         </div>
     </div>
 @else
-    <form action="{{ url('/barang/' . $barang->barang_id . '/update') }}" method="POST" id="form-edit">
+    <form action="{{ url('/barang/' . $barang->barang_id . '/update') }}" method="POST" id="form-edit" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         <div id="modal-master" class="modal-dialog modal-lg" role="document">
@@ -62,6 +62,15 @@
                         <input type="number" name="harga_jual" id="harga_jual" value="{{ $barang->harga_jual }}" class="form-control" required>
                         <small id="error-harga_jual" class="error-text form-text text-danger"></small>
                     </div>
+                    <!-- Gambar saat ini -->
+                    <div class="form-group">
+                        <label>Gambar</label>
+                        <div>
+                            <img src="{{ asset($barang->image) }}" alt="Current Image" width="150" class="img-thumbnail">
+                        </div>
+                        <input type="file" name="image" id="image" class="form-control">
+                        <small id="error-image" class="error-text form-text text-danger"></small>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" data-dismiss="modal" class="btn btn-warning">Batal</button>
@@ -100,7 +109,9 @@
                     $.ajax({
                         url: form.action,
                         type: form.method,
-                        data: $(form).serialize(),
+                        data: new FormData(form),
+                        processData: false,
+                        contentType: false,
                         success: function(response) {
                             if (response.status) {
                                 $('#myModal').modal('hide');

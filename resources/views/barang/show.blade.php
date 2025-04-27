@@ -37,6 +37,13 @@
                         <th>Harga Jual</th>
                         <td>{{ number_format($barang->harga_jual, 0, ',', '.') }}</td>
                     </tr>
+                    <tr>
+                        <th>Gambar</th>
+                        <td>
+                            <img src="{{ asset($barang->image ?: 'images/default-product.png') }}"
+                                 alt="Gambar Barang" width="150" class="img-thumbnail">
+                        </td>
+                    </tr>
                 </table>
             @endempty
         </div>

@@ -35,7 +35,6 @@
         </div>
     </div>
 
-    <!-- Modal Edit Profil -->
     <div class="modal fade" id="modalEditProfile" tabindex="-1" role="dialog" aria-labelledby="modalEditProfileLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <form action="{{ url('/user/update_profile') }}" method="POST" enctype="multipart/form-data" class="modal-content">

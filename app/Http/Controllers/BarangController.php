@@ -7,7 +7,6 @@ use App\Models\KategoriModel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -33,7 +32,7 @@ class BarangController extends Controller
 
     public function list(Request $request)
     {
-        $barang = BarangModel::select('barang_id', 'barang_kode', 'barang_nama', 'harga_beli', 'harga_jual', 'kategori_id')
+        $barang = BarangModel::select('barang_id', 'barang_kode', 'barang_nama', 'harga_beli', 'harga_jual', 'kategori_id', 'image')
             ->with('kategori');
 
         if ($request->kategori_id) {
@@ -61,35 +60,47 @@ class BarangController extends Controller
 
     public function store(Request $request)
     {
-        if ($request->ajax() || $request->wantsJson()) {
-            $rules = [
-                'barang_kode'  => 'required|string|min:3|unique:m_barang,barang_kode',
-                'barang_nama'  => 'required|string|max:100',
-                'harga_beli'   => 'required|numeric',
-                'harga_jual'   => 'required|numeric',
-                'kategori_id'  => 'required|integer'
-            ];
+        // Validasi request
+        $request->validate([
+            'barang_kode'  => 'required|string|min:3|unique:m_barang,barang_kode',
+            'barang_nama'  => 'required|string|max:100',
+            'harga_beli'   => 'required|numeric',
+            'harga_jual'   => 'required|numeric',
+            'kategori_id'  => 'required|integer',
+            'image'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+        ]);
 
-            $validator = Validator::make($request->all(), $rules);
+        // Menyimpan data barang
+        $imagePath = 'images/default-product.png'; // Path default jika tidak ada gambar yang diupload
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'status'   => false,
-                    'message'  => 'Validasi Gagal',
-                    'msgField' => $validator->errors()
-                ]);
-            }
+        // Cek jika ada gambar yang diupload
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time() . '.' . $file->getClientOriginalExtension(); // Menyimpan nama file dengan waktu untuk menghindari nama yang sama
+            $file->move(public_path('images'), $filename); // Memindahkan file gambar ke folder public/images
 
-            BarangModel::create($request->all());
-
-            return response()->json([
-                'status'  => true,
-                'message' => 'Data barang berhasil disimpan'
-            ]);
+            // Menyimpan gambar di database
+            $imagePath = 'images/' . $filename;
         }
 
-        return redirect('/barang');
+        // Menyimpan data barang ke dalam tabel
+        $barang = BarangModel::create([
+            'kategori_id'  => $request->kategori_id,
+            'barang_kode'  => $request->barang_kode,
+            'barang_nama'  => $request->barang_nama,
+            'harga_beli'   => $request->harga_beli,
+            'harga_jual'   => $request->harga_jual,
+            'image'        => $imagePath,  // Menyimpan path gambar
+        ]);
+
+        // Redirect ke halaman barang dan menampilkan modal dengan ID barang
+        return redirect('/barang')->with([
+            'success' => 'Data barang berhasil disimpan',
+            'showModal' => true,
+            'barang_id' => $barang->barang_id // Kirim ID barang untuk modal
+        ]);
     }
+
 
     public function show(string $id)
     {
@@ -126,6 +137,7 @@ class BarangController extends Controller
                 'harga_beli'   => 'required|numeric',
                 'harga_jual'   => 'required|numeric',
                 'kategori_id'  => 'required|integer',
+                'image'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
             ];
 
             $validator = Validator::make($request->all(), $rules);
@@ -141,7 +153,22 @@ class BarangController extends Controller
             $barang = BarangModel::find($id);
 
             if ($barang) {
-                $barang->update($request->all());
+                $imagePath = $barang->image ?? 'images/default-product.png';
+                if ($request->hasFile('image')) {
+                    $image = $request->file('image');
+                    $filename = time() . '_' . $image->getClientOriginalName();
+                    $image->move(public_path('images'), $filename);
+                    $imagePath = 'images/' . $filename;
+                }
+
+                $barang->update([
+                    'kategori_id'  => $request->kategori_id,
+                    'barang_kode'  => $request->barang_kode,
+                    'barang_nama'  => $request->barang_nama,
+                    'harga_beli'   => $request->harga_beli,
+                    'harga_jual'   => $request->harga_jual,
+                    'image'        => $imagePath,
+                ]);
 
                 return response()->json([
                     'status'  => true,
@@ -158,20 +185,6 @@ class BarangController extends Controller
         return redirect('/barang');
     }
 
-    public function destroy(string $id)
-    {
-        $check = BarangModel::find($id);
-        if (!$check) {
-            return redirect('/barang')->with('error', 'Data barang tidak ditemukan');
-        }
-
-        try {
-            BarangModel::destroy($id);
-            return redirect('/barang')->with('success', 'Data barang berhasil dihapus');
-        } catch (QueryException $e) {
-            return redirect('/barang')->with('error', 'Data barang gagal dihapus karena masih terdapat tabel lain yang terkait dengan data ini');
-        }
-    }
 
     public function import()
     {
@@ -308,7 +321,7 @@ class BarangController extends Controller
 
     public function delete_ajax(Request $request, $id)
     {
-       
+
         if ($request->ajax() || $request->wantsJson()) {
             $barang = BarangModel::find($id);
             if ($barang) {
@@ -326,7 +339,5 @@ class BarangController extends Controller
         }
 
         return redirect('/barang');
-
-        // testing
     }
 }

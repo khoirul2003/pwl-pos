@@ -24,21 +24,21 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/', [WelcomeController::class, 'index']);
 
     Route::group(['prefix' => 'user'], function () {
-        Route::get('/', [UserController::class, 'index']); // Menampilkan halaman awal user
-        Route::post('/list', [UserController::class, 'list']); // Menampilkan data user dalam bentuk JSON untuk datatables
-        Route::get('/create', [UserController::class, 'create']); // Menampilkan halaman form tambah user
-        Route::post('/', [UserController::class, 'store']); // Menyimpan data user baru
+        Route::get('/', [UserController::class, 'index']);
+        Route::post('/list', [UserController::class, 'list']);
+        Route::get('/create', [UserController::class, 'create']);
+        Route::post('/', [UserController::class, 'store']);
         Route::get('create_ajax', [UserController::class, 'create_ajax']);
         Route::post('ajax', [UserController::class, 'store_ajax']);
-        Route::get('/{id}', [UserController::class, 'show']); // Menampilkan detail user
-        Route::get('/{id}/edit', [UserController::class, 'edit']); // Menampilkan halaman form edit user
-        Route::put('/{id}', [UserController::class, 'update']); // Menyimpan perubahan data user
+        Route::get('/{id}', [UserController::class, 'show']);
+        Route::get('/{id}/edit', [UserController::class, 'edit']);
+        Route::put('/{id}', [UserController::class, 'update']);
         Route::put('/update_profile', [UserController::class, 'updateProfile']);
         Route::get('/{id}/edit_ajax', [UserController::class, 'edit_ajax']);
         Route::put('/{id}/update_ajax', [UserController::class, 'update_ajax']);
         Route::get('/{id}/delete_ajax', [UserController::class, 'confirm_ajax']);
         Route::delete('/{id}/delete_ajax', [UserController::class, 'delete_ajax']);
-        Route::delete('/{id}', [UserController::class, 'destroy']); // Menghapus data user
+        Route::delete('/{id}', [UserController::class, 'destroy']);
     });
 
     Route::middleware([AuthorizeUser::class . ':ADM'])->prefix('level')->group(function () {
@@ -59,7 +59,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
-    Route::group(['prefix' => 'kategori'], function () {
+    Route::middleware([AuthorizeUser::class . ':ADM,MNG'])->prefix('kategori')->group(function () {
         Route::get('/', [KategoriController::class, 'index']);
         Route::post('/list', [KategoriController::class, 'list']);
         Route::get('/create', [KategoriController::class, 'create']);
@@ -67,7 +67,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}', [KategoriController::class, 'show']);
         Route::get('/{id}/edit', [KategoriController::class, 'edit']);
         Route::put('/{id}', [KategoriController::class, 'update']);
-        Route::delete('/{id}', [KategoriController::class, 'destroy']);
+        Route::get('/{id}/delete_ajax', [KategoriController::class, 'confirm_ajax']);
+        Route::delete('/{id}/delete_ajax', [KategoriController::class, 'delete_ajax']);
+        Route::get('/import', [KategoriController::class, 'import']);
+        Route::post('/import_ajax', [KategoriController::class, 'import_ajax']);
+        Route::get('/export_excel', [KategoriController::class, 'export_excel']);
+        Route::get('/export_pdf', [KategoriController::class, 'export_pdf']);
     });
 
 
@@ -81,7 +86,6 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{id}/update', [BarangController::class, 'update']);
         Route::get('/{id}/delete_ajax', [BarangController::class, 'confirm_ajax']);
         Route::delete('/{id}/delete_ajax', [BarangController::class, 'delete_ajax']);
-        Route::delete('/{id}', [BarangController::class, 'destroy']);
         Route::get('/import', [BarangController::class, 'import']);
         Route::post('/import_ajax', [BarangController::class, 'import_ajax']);
         Route::get('/export_excel', [BarangController::class, 'export_excel']);
